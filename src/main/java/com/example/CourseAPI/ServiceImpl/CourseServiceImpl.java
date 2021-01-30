@@ -4,14 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.CourseAPI.Model.Course;
 import com.example.CourseAPI.Service.CourseService;
-import com.example.CourseAPI.repo.CourseRepo;
+import com.example.CourseAPI.Repo.CourseRepo;
 
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class CourseServiceImpl implements CourseService {
@@ -20,16 +16,39 @@ public class CourseServiceImpl implements CourseService {
     @Autowired
     private CourseRepo courseRepo;
 
+    @Autowired
+    private CourseManager courseManager;
+
 
     @Override
     public List<Course> getAllCourses(){
-        return  courseRepo.findAll();
+
+        List<Course> courseList = courseManager.fetchAllCourse();git
+        if(courseList.size()>=3){
+            System.out.println("Data Coming From Redis");
+            return courseList;
+        }
+        else{
+            courseList = courseRepo.findAll();
+            System.out.println("Data Coming From DB");
+            return  courseList;
+        }
     }
 
     @Override
-    public Optional<Course> getCourse(int id) throws NullPointerException{
+    public Course getCourse(int id) throws NullPointerException{
         try{
-            return courseRepo.findById(id);
+           Course course = courseManager.fetchCourseById(id);
+            if(course != null){
+                System.out.println("Data Coming From Redis");
+                return course;
+            }
+            else{
+                System.out.println("Data Coming From Db");
+                 return  (Course) courseRepo.findById(id);
+
+
+            }
         }
         catch (NullPointerException ex){
             throw new NullPointerException();
@@ -38,6 +57,7 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public void addNewCourse(Course course){
         courseRepo.save(course);
+        courseManager.saveCourse(course);
     }
 
 
@@ -49,6 +69,7 @@ public class CourseServiceImpl implements CourseService {
         }
         else{
             courseRepo.save(course);
+            courseManager.updateCourse(course , id);
         }
 
     }
@@ -56,6 +77,7 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public void deleteCourse(int id){
         courseRepo.deleteById(id);
+        courseManager.deleteCourse(id);
     }
 
 

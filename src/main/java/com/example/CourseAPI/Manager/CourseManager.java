@@ -2,13 +2,15 @@ package com.example.CourseAPI.Manager;
 
 import com.example.CourseAPI.Model.Course;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public interface CourseManager {
 
-    void save(Course newCourse);
-    Map<String, Course> findAll();
-    Course findById(int id);
-    void update(Course course , int id );
-    void delete( int id );
+    void saveCourse(Course newCourse);
+    List< Course> fetchAllCourse();
+    Course fetchCourseById(int id);
+    void updateCourse(Course course , int id );
+    void deleteCourse( int id );
 }

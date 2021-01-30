@@ -7,42 +7,41 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
-
+@Repository
 public class CourseManagerImpl implements CourseManager {
 
-    private RedisTemplate<String, Course> redisTemplate;
-    private HashOperations hashOperations;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
-    public CourseManagerImpl(RedisTemplate<String, Course> redisTemplate) {
-        this.redisTemplate = redisTemplate;
-        hashOperations = this.redisTemplate.opsForHash();
+    private static final String KEY = "COURSE";
+
+    @Override
+    public void saveCourse(Course newCourse) {
+        this.redisTemplate.opsForHash().put(KEY, newCourse.getId() , newCourse);
     }
 
     @Override
-    public void save(Course newCourse) {
-        hashOperations.put("COURSE" , newCourse.getId() , newCourse);
+    public List<Course> fetchAllCourse() {
+        return this.redisTemplate.opsForHash().values(KEY);
     }
 
     @Override
-    public Map<String, Course> findAll() {
-        return hashOperations.entries("COURSE");
+    public Course fetchCourseById(int id) {
+        return (Course) this.redisTemplate.opsForHash().get(KEY , id);
     }
 
     @Override
-    public Course findById(int id) {
-        return (Course)hashOperations.get("COURSE" , id) ;
-    }
-
-    @Override
-    public void update(Course course , int id ) {
-        save(new Course(id , course.getName() , course.getDescription()));
+    public void updateCourse(Course course , int id ) {
+        saveCourse(new Course(id , course.getName() , course.getDescription()));
 
     }
 
     @Override
-    public void delete(int id) {
-       hashOperations.delete("COURSE" , id);
+    public void deleteCourse(int id) {
+        this.redisTemplate.opsForHash().delete(KEY , id);
     }
 }

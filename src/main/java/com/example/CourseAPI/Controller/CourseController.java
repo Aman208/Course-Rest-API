@@ -38,7 +38,7 @@ public class CourseController {
     @GetMapping("/getCourse/{id}")
     public ResponseEntity getCourse(@PathVariable("id") String id){
         try{
-            Optional<Course> course= this.courseService.getCourse(Integer.parseInt(id));
+            Course course= this.courseService.getCourse(Integer.parseInt(id));
             if(course==null){
                 throw new NoSuchElementException();
             }
