@@ -1,5 +1,6 @@
 package com.example.CourseAPI.ServiceImpl;
 import com.example.CourseAPI.Manager.CourseManager;
+import com.example.CourseAPI.Manager.CourseManagerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.CourseAPI.Model.Course;
@@ -13,7 +14,7 @@ import java.util.List;
 public class CourseServiceImpl implements CourseService {
 
 
-    @Autowired
+   @Autowired
     private CourseRepo courseRepo;
 
     @Autowired
@@ -23,7 +24,7 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public List<Course> getAllCourses(){
 
-        List<Course> courseList = courseManager.fetchAllCourse();git
+        List<Course> courseList = courseManager.fetchAllCourse();
         if(courseList.size()>=3){
             System.out.println("Data Coming From Redis");
             return courseList;
@@ -45,9 +46,9 @@ public class CourseServiceImpl implements CourseService {
             }
             else{
                 System.out.println("Data Coming From Db");
-                 return  (Course) courseRepo.findById(id);
-
-
+                course = (Course) courseRepo.findById(id);
+                courseManager.saveCourse(course);
+                return course;
             }
         }
         catch (NullPointerException ex){
@@ -57,7 +58,6 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public void addNewCourse(Course course){
         courseRepo.save(course);
-        courseManager.saveCourse(course);
     }
 
 
@@ -69,7 +69,7 @@ public class CourseServiceImpl implements CourseService {
         }
         else{
             courseRepo.save(course);
-            courseManager.updateCourse(course , id);
+            courseManager.deleteCourse(id);
         }
 
     }
